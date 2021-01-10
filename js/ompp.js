@@ -9,6 +9,7 @@ var beatmap_data = {
     note_count: 0
 };
 var values_changed = true;
+var isBms = false;
 
 // Show message as a modal dialog
 function show_message(msg, title) {
@@ -245,6 +246,7 @@ function load_bms_data(file_content) {
         note_count: data.notes.length
     };
     values_changed = false;
+    isBms = true;
     update_fields();
 }
 
@@ -299,7 +301,11 @@ function get_pp(stars, score, od, note_count) {
     const real_score = score / score_rate;
     if(real_score > 1000000) return NaN;
 
-    var hit300_window = 34 + 3 * (Math.min(10, Math.max(0, 10 - od)));
+    if (isBms){
+        var hit300_window = 34 * (od+1);
+    }else {
+        var hit300_window = 34 + 3 * (Math.min(10, Math.max(0, 10 - od)));
+    }
     var strain_value = (5 * Math.max(1, stars / 0.2) - 4) ** 2.2 / 135 * (1 + 0.1 * Math.min(1, note_count / 1500));
     if(real_score <= 500000) {
         strain_value = 0;
