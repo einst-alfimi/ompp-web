@@ -229,6 +229,25 @@ function load_data(file_content) {
     update_fields();
 }
 
+function load_bms_data(file_content) {
+    // get mods
+    const mods = get_mods();
+    const data = BMSparse.loadFromFile(file_content, mods);
+    const star_rate_ht = get_star_rate(data.notes, data.keys, 0.75);
+    const star_rate_nt = get_star_rate(data.notes, data.keys, 1);
+    const star_rate_dt = get_star_rate(data.notes, data.keys, 1.5);
+    // update values
+    beatmap_data = {
+        od: data.od,
+        stars_ht: star_rate_ht,
+        stars_nt: star_rate_nt,
+        stars_dt: star_rate_dt,
+        note_count: data.notes.length
+    };
+    values_changed = false;
+    update_fields();
+}
+
 // Attempt to load and parse .osu file or url
 function load_osufile() {
     var file_content = "";
@@ -239,7 +258,13 @@ function load_osufile() {
         var reader = new FileReader();
         reader.onload = () => {
             file_content = reader.result;
-            load_data(file_content);
+            if (opened_file.name.toLowerCase().match(/\.(bms|bme)$/)) {
+                // bms/bme
+                load_bms_data(file_content);
+            } else{
+                // osu
+                load_data(file_content);
+            }
         };
         reader.readAsText(opened_file);
     } else if(osu_url.match(/^\d+$/g)) {
